@@ -1,6 +1,13 @@
+/* flow */
+import {
+  stylelint$needlessDisablesReport,
+  stylelint$result,
+} from "./flow-declarations"
 import _ from "lodash"
 
-export default function (results) {
+export default function (
+  results: Array<stylelint$result>
+): stylelint$needlessDisablesReport {
   const report = []
 
   results.forEach(result => {

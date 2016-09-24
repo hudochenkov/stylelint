@@ -1,6 +1,15 @@
-import { isPlainObject } from "lodash"
+/* @flow */
+import {
+  stylelint$configRulePrimaryOption,
+  stylelint$configRuleSettings,
+} from "./flow-declarations"
+import _ from "lodash"
 
-export default function (rawSettings, ruleName, primaryOptionArray) {
+export default function (
+  rawSettings: stylelint$configRuleSettings,
+  ruleName: string,
+  primaryOptionArray?: boolean,
+): Array<stylelint$configRulePrimaryOption | [stylelint$configRulePrimaryOption, Object]> {
   // Settings can be
   // a. A solitary primitive value or object, in which case put it in an array
   // b. An array with a primary option and a secondary options object, in which case use that array
@@ -17,8 +26,8 @@ export default function (rawSettings, ruleName, primaryOptionArray) {
 
   if (
     rawSettings.length === 2
-    && !isPlainObject(rawSettings[0])
-    && isPlainObject(rawSettings[1])
+    && !_.isPlainObject(rawSettings[0])
+    && _.isPlainObject(rawSettings[1])
   ) { return rawSettings }
 
   return [rawSettings]

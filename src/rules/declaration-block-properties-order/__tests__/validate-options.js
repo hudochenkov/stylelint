@@ -17,9 +17,8 @@ test("valid default order", t => {
   }).then(function (data) {
     const invalidOptionWarnings = data.results[0].invalidOptionWarnings
     t.equal(invalidOptionWarnings.length, 0)
-  })
-
-  t.plan(1)
+    t.end()
+  }).catch(t.end)
 })
 
 test("valid 'strict' order", t => {
@@ -39,9 +38,8 @@ test("valid 'strict' order", t => {
   }).then(function (data) {
     const invalidOptionWarnings = data.results[0].invalidOptionWarnings
     t.equal(invalidOptionWarnings.length, 0)
-  })
-
-  t.plan(1)
+    t.end()
+  }).catch(t.end)
 })
 
 test("valid 'flexible' order", t => {
@@ -61,9 +59,8 @@ test("valid 'flexible' order", t => {
   }).then(function (data) {
     const invalidOptionWarnings = data.results[0].invalidOptionWarnings
     t.equal(invalidOptionWarnings.length, 0)
-  })
-
-  t.plan(1)
+    t.end()
+  }).catch(t.end)
 })
 
 test("invalid option order option", t => {
@@ -87,9 +84,8 @@ test("invalid option order option", t => {
       invalidOptionWarnings[0].text,
       "Invalid option \"[{\"order\":\"unknown-keyword\",\"properties\":[\"color\"]}]\" for rule declaration-block-properties-order"
     )
-  })
-
-  t.plan(2)
+    t.end()
+  }).catch(t.end)
 })
 
 test("invalid object lacks 'properties' property", t => {
@@ -110,9 +106,8 @@ test("invalid object lacks 'properties' property", t => {
       invalidOptionWarnings[0].text,
       "Invalid option \"[{\"order\":\"flexible\"}]\" for rule declaration-block-properties-order"
     )
-  })
-
-  t.plan(2)
+    t.end()
+  }).catch(t.end)
 })
 
 test("invalid nested array", t => {
@@ -131,9 +126,8 @@ test("invalid nested array", t => {
       invalidOptionWarnings[0].text,
       "Invalid option \"[[\"nested-array\"]]\" for rule declaration-block-properties-order"
     )
-  })
-
-  t.plan(2)
+    t.end()
+  }).catch(t.end)
 })
 
 test("invalid object outside of array", t => {
@@ -156,7 +150,6 @@ test("invalid object outside of array", t => {
       invalidOptionWarnings[0].text,
       "Invalid option \"{\"properties\":[\"color\"]}\" for rule declaration-block-properties-order"
     )
-  })
-
-  t.plan(2)
+    t.end()
+  }).catch(t.end)
 })
