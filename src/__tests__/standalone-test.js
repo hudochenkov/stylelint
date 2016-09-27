@@ -179,4 +179,21 @@ test("standalone with deprecations", t => {
   }).catch(t.end)
 })
 
+test.only("standalone with different configs per file", t => {
+  standalone({
+    files: [path.join(__dirname, "./fixtures/config-per-file/**/*.css")],
+  }).then(({ results }) => {
+    const resultA = results.find((result) => result.source.indexOf("a.css") !== -1)
+    const resultB = results.find((result) => result.source.indexOf("b.css") !== -1)
+    const resultC = results.find((result) => result.source.indexOf("c.css") !== -1)
+    const resultD = results.find((result) => result.source.indexOf("d.css") !== -1)
+    t.equal(resultA.warnings.length, 0, "no warnings for A")
+    t.equal(resultB.warnings.length, 1, "one warning for B")
+    t.ok(resultB.warnings[0].text.indexOf("Unexpected empty block") !== -1, "correct warning for B")
+    t.equal(resultC.warnings.length, 0, "no warnings for C")
+    t.equal(resultD.warnings.length, 0, "no warnings for D")
+    t.end()
+  }).catch(t.end)
+})
+
 function logError(err) { console.log(err.stack) } // eslint-disable-line no-console
