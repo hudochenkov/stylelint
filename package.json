@@ -90,7 +90,6 @@
     "request": "^2.69.0",
     "rimraf": "^2.5.2",
     "sinon": "^1.16.1",
-    "stylelint": "^7.3.1",
     "tape": "^4.2.0"
   },
   "scripts": {

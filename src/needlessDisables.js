@@ -71,7 +71,17 @@ export default function (
   return report
 }
 
-function isWarningInRange(warning, range) {
+function isWarningInRange(
+  warning: {
+    rule: string,
+    line: number,
+  },
+  range: {
+    rules?: Array<string>,
+    start: number,
+    end?: number,
+  },
+): boolean {
   const { rule, line } = warning
   return range.start <= line
     && (range.end >= line || range.end === undefined)

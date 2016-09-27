@@ -8,8 +8,7 @@ export default function (
   stylelint: stylelint$api,
   filePathArg?: string,
 ): Promise<boolean> {
-  // ??? to please Flow
-  const filePath = filePathArg
+  const filePath = filePathArg // to please Flow
   if (!filePath) { return Promise.resolve(false) }
 
   return stylelint.getConfigForFile(filePath).then(({ config }) => {

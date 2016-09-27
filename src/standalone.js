@@ -28,7 +28,7 @@ export default function ({
   reportNeedlessDisables,
   formatter = "json",
   syntax,
-}: stylelint$standaloneOptions = {}) {
+}: stylelint$standaloneOptions = {}): Promise<stylelint$standaloneReturnValue> {
   const isValidCode = typeof code === "string"
   if (!files && !isValidCode || files && (code || isValidCode)) {
     throw new Error("You must pass stylelint a `files` glob or a `code` string, though not both")

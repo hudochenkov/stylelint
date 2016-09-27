@@ -189,7 +189,7 @@ function extendConfig(
   stylelint: Object,
   config: stylelint$config,
   configDir: stylelint$config,
-): Promise<Object> {
+): Promise<stylelint$config> {
   if (!config.extends) return Promise.resolve(config)
 
   const originalWithoutExtends = _.omit(config, "extends")
@@ -226,7 +226,10 @@ function loadExtendedConfig(
   })
 }
 
-function mergeConfigs(a: Object, b: Object): Object {
+function mergeConfigs(
+  a: stylelint$config,
+  b: stylelint$config,
+): stylelint$config {
   const pluginMerger = {}
   if (a.plugins || b.plugins) {
     pluginMerger.plugins = _.union(a.plugins, b.plugins)
