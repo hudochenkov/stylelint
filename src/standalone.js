@@ -54,7 +54,7 @@ export default function ({
   })
 
   if (!files) {
-    return stylelint.lint({ code, codeFilename })
+    return stylelint.lintSource({ code, codeFilename })
       .then((postcssResult) => {
         return stylelint._createStylelintResult(postcssResult)
       })
@@ -73,7 +73,7 @@ export default function ({
       }
 
       const getStylelintResults = filePaths.map((filePath) => {
-        return stylelint.lint({ filePath })
+        return stylelint.lintSource({ filePath })
           .then((postcssResult) => {
             return stylelint._createStylelintResult(postcssResult, filePath)
           })

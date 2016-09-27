@@ -46,12 +46,13 @@ export type stylelint$api = {
   _configCache: Map<string, Object>,
   _postcssResultCache?: Map<string, Object>,
 
+  _augmentConfig: Function,
   _getPostcssResult: Function,
   _createEmptyPostcssResult?: Function,
 
   getConfigForFile: Function,
   isPathIgnored: Function,
-  lint: Function,
+  lintSource: Function,
 }
 
 export type stylelint$warning = {

@@ -10,7 +10,7 @@ export default postcss.plugin("stylelint", (options = {}) => {
 
   const stylelint = createStylelint(tailoredOptions)
   return (root, result) => {
-    return stylelint.lint({
+    return stylelint.lintSource({
       filePath: options.from || _.get(root, "source.input.file"),
       existingPostcssResult: result,
     })

@@ -179,7 +179,7 @@ test("standalone with deprecations", t => {
   }).catch(t.end)
 })
 
-test.only("standalone with different configs per file", t => {
+test("standalone with different configs per file", t => {
   standalone({
     files: [path.join(__dirname, "./fixtures/config-per-file/**/*.css")],
   }).then(({ results }) => {
