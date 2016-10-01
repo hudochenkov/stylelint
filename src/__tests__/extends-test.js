@@ -74,3 +74,21 @@ test("standalone extending a config that is overridden", t => {
     t.end()
   }).catch(t.end)
 })
+
+test("standalone extending a config from process.cwd", t => {
+  const actualCwd = process.cwd()
+  process.chdir(__dirname)
+  standalone({
+    code: "a { b: \"c\" }",
+    config: {
+      extends: ["./fixtures/config-string-quotes-single"],
+    },
+  }).then(({ results }) => {
+    t.equal(results[0].warnings.length, 1)
+    process.chdir(actualCwd)
+    t.end()
+  }).catch((err) => {
+    process.chdir(actualCwd)
+    t.end(err)
+  })
+})

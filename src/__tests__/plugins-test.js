@@ -255,3 +255,24 @@ test("plugin with primary option array within options array", t => {
     t.end()
   }).catch(t.end)
 })
+
+test("loading a plugin from process.cwd", t => {
+  const actualCwd = process.cwd()
+  process.chdir(__dirname)
+
+  const config = {
+    plugins: ["./fixtures/plugin-warn-about-foo"],
+    rules: {
+      "plugin/warn-about-foo": "always",
+    },
+  }
+  postcss().use((stylelint(config))).process(".foo {}").then(result => {
+    t.equal(result.warnings().length, 1, "error is caught")
+    t.equal(result.warnings()[0].rule, "plugin/warn-about-foo", "error is correct")
+    process.chdir(actualCwd)
+    t.end()
+  }).catch((err) => {
+    process.chdir(actualCwd)
+    t.end(err)
+  })
+})

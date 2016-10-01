@@ -140,11 +140,16 @@ function getModulePath(
   basedir: string,
   lookup: string,
 ): string {
-  const path = resolveFrom(basedir, lookup)
-  if (path) return path
-  throw configurationError(
-    `Could not find "${lookup}". Do you need a \`configBasedir\`?`
-  )
+  let path = resolveFrom(basedir, lookup)
+  if (!path) {
+    path = resolveFrom(process.cwd(), lookup)
+  }
+  if (!path) {
+    throw configurationError(
+      `Could not find "${lookup}". Do you need a \`configBasedir\`?`
+    )
+  }
+  return path
 }
 
 function absolutizeProcessors(
