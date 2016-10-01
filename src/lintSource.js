@@ -60,7 +60,7 @@ function lintPostcssResult(
   stylelint: stylelint$internalApi,
   postcssResult: PostcssResult,
   config: stylelint$config,
-): Promise<void> {
+): Promise<> {
   postcssResult.stylelint = postcssResult.stylelint || {}
   postcssResult.stylelint.ruleSeverities = {}
   postcssResult.stylelint.customMessages = {}

@@ -3,42 +3,32 @@ import type {
   stylelint$configAugmented,
   stylelint$internalApi,
 } from "./flow-declarations"
+import { augmentConfigFull } from "./augmentConfig"
 import { configurationError } from "./utils"
 
 export default function (
   stylelint: stylelint$internalApi,
   searchPath?: string,
-): Promise<{
-  config: stylelint$configAugmented,
-  configDir: string
-}> {
+): Promise<stylelint$configAugmented> {
   searchPath = searchPath || process.cwd()
 
   if (stylelint._options.config) {
-    const cached = stylelint._configCache.get(stylelint._options.config)
-    if (cached !== undefined) { return cached }
-    // stylelint._explorer (cosmiconfig) is already configured to
-    // run augmentConfig; but since we're making up the result here,
+    // stylelint._fullExplorer (cosmiconfig) is already configured to
+    // run augmentConfigFull; but since we're making up the result here,
     // we need to manually run the transform
-    const augmentedResult = stylelint._augmentConfig({
+    const augmentedResult = augmentConfigFull(stylelint, {
       config: stylelint._options.config,
-      configDir: process.cwd(),
+      filepath: process.cwd(),
     })
-    stylelint._configCache.set(searchPath, augmentedResult)
     return augmentedResult
   }
 
-  const cached = stylelint._configCache.get(searchPath)
-  if (cached !== undefined) { return cached }
-
-  return stylelint._explorer.load(searchPath, stylelint._options.configFile)
-    .then((result) => {
-      if (!result) {
+  return stylelint._fullExplorer.load(searchPath, stylelint._options.configFile)
+    .then((config) => {
+      if (!config) {
         const ending = (searchPath) ? ` for ${searchPath}` : ""
         throw configurationError(`No configuration provided${ending}`)
       }
-      const augmentedResult = stylelint._augmentConfig(result)
-      stylelint._configCache.set(searchPath, augmentedResult)
-      return augmentedResult
+      return config
     })
 }

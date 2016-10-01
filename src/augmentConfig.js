@@ -17,67 +17,74 @@ import rules from "./rules"
 const DEFAULT_IGNORE_FILENAME = ".stylelintignore"
 const FILE_NOT_FOUND_ERROR_CODE = "ENOENT"
 
-export default function (
-  stylelint: stylelint$internalApi,
-  cosmiconfigResult: {
-    config: stylelint$config,
-    configDir: string,
-  },
-): Promise<{
-  config: stylelint$configAugmented,
-  configDir: string
-}> {
-  const configDir = stylelint._options.configBasedir
-    || path.dirname(cosmiconfigResult.configDir || "")
-
-  return performBasicAugmentations(stylelint, cosmiconfigResult.config, configDir, {
-    addIgnorePatterns: true,
-    ignoreFilePath: stylelint.ignoreFilePath,
-  })
-  .then((augmentedConfig) => {
-    return addPluginFunctions(augmentedConfig)
-  })
-  .then((augmentedConfig) => {
-    return addProcessorFunctions(augmentedConfig)
-  })
-  .then((augmentedConfig) => {
-    const configWithOverrides = _.merge(augmentedConfig, stylelint._options.configOverrides)
-
-    if (!configWithOverrides.rules) {
-      throw configurationError("No rules found within configuration. Have you provided a \"rules\" property?")
-    }
-
-    return configWithOverrides
-  })
-  .then((augmentedConfig) => {
-    return normalizeAllRuleSettings(augmentedConfig)
-  })
-  .then((augmentedConfig) => {
-    return {
-      config: augmentedConfig,
-      configDir,
-    }
-  })
-}
-
-function performBasicAugmentations(
+function augmentConfigBasic(
   stylelint: Object,
   config: stylelint$config,
   configDir: string,
-  options: {
-    addIgnorePatterns: boolean,
-    ignoreFilePath?: string
+): Promise<stylelint$config> {
+  return Promise.resolve()
+    .then(() => {
+      return absolutizePaths(config, configDir)
+    })
+    .then((augmentedConfig) => {
+      return extendConfig(stylelint, augmentedConfig, configDir)
+    })
+}
+
+function augmentConfigExtended(
+  stylelint: Object,
+  cosmiconfigResult: {
+    config: stylelint$config,
+    filepath: string,
   },
 ): Promise<stylelint$config> {
-  const getConfigWithIgnorePatterns = (options.addIgnorePatterns)
-    ? addIgnorePatterns(stylelint, config, configDir)
-    : Promise.resolve(config)
+  const configDir = path.dirname(cosmiconfigResult.filepath || "")
+  const cleanedConfig = _.omit(cosmiconfigResult.config, "ignoreFiles")
+  return augmentConfigBasic(stylelint, cleanedConfig, configDir)
+}
 
-  return getConfigWithIgnorePatterns.then((augmentedConfig) => {
-    return absolutizePaths(augmentedConfig, configDir)
-  }).then((augmentedConfig) => {
-    return extendConfig(stylelint, augmentedConfig, configDir)
-  })
+function augmentConfigFull(
+  stylelint: stylelint$internalApi,
+  cosmiconfigResult: ?{
+    config: stylelint$config,
+    filepath: string,
+  },
+): Promise<stylelint$configAugmented> {
+  if (!cosmiconfigResult) return Promise.resolve(null)
+
+  const { config, filepath } = cosmiconfigResult
+
+  const configDir = stylelint._options.configBasedir
+    || path.dirname(filepath || "")
+
+  return addIgnorePatterns(stylelint, config, configDir)
+    .then((augmentedConfig) => {
+      return augmentConfigBasic(stylelint, augmentedConfig, configDir)
+    })
+    .then((augmentedConfig) => {
+      return addPluginFunctions(augmentedConfig)
+    })
+    .then((augmentedConfig) => {
+      return addProcessorFunctions(augmentedConfig)
+    })
+    .then((augmentedConfig) => {
+      const configWithOverrides = _.merge(augmentedConfig, stylelint._options.configOverrides)
+
+      if (!configWithOverrides.rules) {
+        throw configurationError("No rules found within configuration. Have you provided a \"rules\" property?")
+      }
+
+      return configWithOverrides
+    })
+    .then((augmentedConfig) => {
+      return normalizeAllRuleSettings(augmentedConfig)
+    })
+    .then((augmentedConfig) => {
+      return {
+        config: augmentedConfig,
+        configDir,
+      }
+    })
 }
 
 function addIgnorePatterns(
@@ -185,16 +192,7 @@ function loadExtendedConfig(
   extendLookup: string,
 ): Promise<stylelint$config> {
   const extendPath = getModulePath(configDir, extendLookup)
-  return stylelint._explorer.load(null, extendPath).then(result => {
-    // Make sure to also augment the config that we're merging in
-    // ... but the `ignoreFiles` option only works with the
-    // config that is being directly invoked, not any
-    // extended configs
-    const cleanedConfig = _.omit(result.config, "ignoreFiles")
-    return performBasicAugmentations(stylelint, cleanedConfig, path.dirname(extendPath), {
-      addIgnorePatterns: false,
-    })
-  })
+  return stylelint._extendExplorer.load(null, extendPath)
 }
 
 function mergeConfigs(
@@ -303,4 +301,9 @@ function addProcessorFunctions(
   config.codeProcessors = codeProcessors
   config.resultProcessors = resultProcessors
   return config
+}
+
+export {
+  augmentConfigExtended,
+  augmentConfigFull,
 }
