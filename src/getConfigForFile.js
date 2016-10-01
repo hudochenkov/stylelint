@@ -9,7 +9,10 @@ import { configurationError } from "./utils"
 export default function (
   stylelint: stylelint$internalApi,
   searchPath?: string,
-): Promise<stylelint$configAugmented> {
+): Promise<{
+  config: stylelint$configAugmented,
+  filepath: string
+}> {
   searchPath = searchPath || process.cwd()
 
   if (stylelint._options.config) {

@@ -37,10 +37,18 @@ function augmentConfigExtended(
     config: stylelint$config,
     filepath: string,
   },
-): Promise<stylelint$config> {
+): Promise<{
+  config: stylelint$config,
+  filepath: string,
+}> {
   const configDir = path.dirname(cosmiconfigResult.filepath || "")
   const cleanedConfig = _.omit(cosmiconfigResult.config, "ignoreFiles")
-  return augmentConfigBasic(stylelint, cleanedConfig, configDir)
+  return augmentConfigBasic(stylelint, cleanedConfig, configDir).then((augmentedConfig) => {
+    return {
+      config: augmentedConfig,
+      filepath: cosmiconfigResult.filepath,
+    }
+  })
 }
 
 function augmentConfigFull(
@@ -82,7 +90,7 @@ function augmentConfigFull(
     .then((augmentedConfig) => {
       return {
         config: augmentedConfig,
-        configDir,
+        filepath: cosmiconfigResult.filepath,
       }
     })
 }
@@ -179,8 +187,8 @@ function extendConfig(
 
   const loadExtends = [].concat(config.extends).reduce((resultPromise, extendLookup) => {
     return resultPromise.then((resultConfig) => {
-      return loadExtendedConfig(stylelint, resultConfig, configDir, extendLookup).then((extendedConfig) => {
-        return mergeConfigs(resultConfig, extendedConfig)
+      return loadExtendedConfig(stylelint, resultConfig, configDir, extendLookup).then((extendResult) => {
+        return mergeConfigs(resultConfig, extendResult.config)
       })
     })
   }, Promise.resolve(originalWithoutExtends))

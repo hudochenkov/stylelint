@@ -35,10 +35,10 @@ export default function (
   stylelint._postcssResultCache = new Map()
   stylelint._createStylelintResult = _.partial(createStylelintResult, stylelint)
   stylelint._getPostcssResult = _.partial(getPostcssResult, stylelint)
+  stylelint._lintSource = _.partial(lintSource, stylelint)
 
   stylelint.getConfigForFile = _.partial(getConfigForFile, stylelint)
   stylelint.isPathIgnored = _.partial(isPathIgnored, stylelint)
-  stylelint.lintSource = _.partial(lintSource, stylelint)
 
   return stylelint
 }
