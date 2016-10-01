@@ -40,7 +40,7 @@ export type stylelint$options = {
   syntax?: stylelint$syntaxes,
 }
 
-export type stylelint$api = {
+export type stylelint$internalApi = {
   _options: stylelint$options,
   _explorer: { load: Function },
   _configCache: Map<string, Object>,

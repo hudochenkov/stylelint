@@ -1,7 +1,7 @@
 /* @flow */
 import {
-  stylelint$api,
   stylelint$config,
+  stylelint$internalApi,
 } from "./flow-declarations"
 import PostcssResult from "postcss/lib/result"
 import _ from "lodash"
@@ -10,7 +10,7 @@ import { configurationError } from "./utils"
 import ruleDefinitions from "./rules"
 
 export default function (
-  stylelint: stylelint$api,
+  stylelint: stylelint$internalApi,
   options: {
     code?: string,
     codeFilename?: string,
@@ -39,8 +39,8 @@ export default function (
     return stylelint.getConfigForFile(configSearchPath).then(({ config }) => {
       const { existingPostcssResult } = options
       if (existingPostcssResult) {
-        lintPostcssResult(stylelint, existingPostcssResult, config)
-        return existingPostcssResult
+        return lintPostcssResult(stylelint, existingPostcssResult, config)
+          .then(() => existingPostcssResult)
       }
 
       return stylelint._getPostcssResult({
@@ -49,19 +49,18 @@ export default function (
         filePath: inputFilePath,
         codeProcessors: config.codeProcessors,
       }).then((postcssResult) => {
-        lintPostcssResult(stylelint, postcssResult, config)
-        return postcssResult
+        return lintPostcssResult(stylelint, postcssResult, config)
+          .then(() => postcssResult)
       })
     })
   })
 }
 
-// This is synchronous
 function lintPostcssResult(
-  stylelint: stylelint$api,
+  stylelint: stylelint$internalApi,
   postcssResult: PostcssResult,
   config: stylelint$config,
-): void {
+): Promise<void> {
   postcssResult.stylelint = postcssResult.stylelint || {}
   postcssResult.stylelint.ruleSeverities = {}
   postcssResult.stylelint.customMessages = {}
@@ -72,6 +71,11 @@ function lintPostcssResult(
   if (stylelint._options.reportNeedlessDisables || stylelint._options.ignoreDisables) {
     postcssResult.stylelint.ignoreDisables = true
   }
+
+  // Promises for the rules. Although the rule code runs synchronously now,
+  // the use of Promises makes it compatible with the possibility of async
+  // rules down the line.
+  const performRules = []
 
   Object.keys(config.rules).forEach((ruleName) => {
     const ruleFunction = ruleDefinitions[ruleName] || config.pluginFunctions[ruleName]
@@ -91,8 +95,13 @@ function lintPostcssResult(
     postcssResult.stylelint.ruleSeverities[ruleName] = _.get(secondaryOptions, "severity", defaultSeverity)
     postcssResult.stylelint.customMessages[ruleName] = secondaryOptions && secondaryOptions.message
 
-    ruleFunction(primaryOption, secondaryOptions)(postcssRoot, postcssResult)
+    const performRule = Promise.resolve().then(() => {
+      ruleFunction(primaryOption, secondaryOptions)(postcssRoot, postcssResult)
+    })
+    performRules.push(performRule)
   })
+
+  return Promise.all(performRules)
 }
 
 function createEmptyPostcssResult(filePath?: string): Object {

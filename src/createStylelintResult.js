@@ -1,13 +1,13 @@
 /* @flow */
 import type {
-  stylelint$api,
+  stylelint$internalApi,
   stylelint$result,
 } from "./flow-declarations"
 import PostcssResult from "postcss/lib/result"
 import _ from "lodash"
 
 export default function (
-  stylelint: stylelint$api,
+  stylelint: stylelint$internalApi,
   postcssResult: PostcssResult,
   filePath?: string,
 ): Promise<stylelint$result> {

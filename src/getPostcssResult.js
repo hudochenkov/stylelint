@@ -1,6 +1,6 @@
 /* @flow */
 import {
-  stylelint$api,
+  stylelint$internalApi,
   stylelint$syntaxes,
 } from "./flow-declarations"
 import PostcssResult from "postcss/lib/result"
@@ -14,7 +14,7 @@ import sugarssSyntax from "sugarss"
 const postcssProcessor = postcss()
 
 export default function (
-  stylelint: stylelint$api,
+  stylelint: stylelint$internalApi,
   options: {
     code?: string,
     codeFilename?: string,

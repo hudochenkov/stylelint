@@ -2,10 +2,10 @@
 import ignore from "ignore"
 import multimatch from "multimatch"
 import path from "path"
-import type { stylelint$api } from "./flow-declarations"
+import type { stylelint$internalApi } from "./flow-declarations"
 
 export default function (
-  stylelint: stylelint$api,
+  stylelint: stylelint$internalApi,
   filePathArg?: string,
 ): Promise<boolean> {
   const filePath = filePathArg // to please Flow

@@ -1,6 +1,6 @@
 /* @flow */
 import {
-  stylelint$api,
+  stylelint$internalApi,
   stylelint$options,
 } from "./flow-declarations"
 import _ from "lodash"
@@ -14,7 +14,7 @@ import lintSource from "./lintSource"
 
 export default function (
   options: stylelint$options = {},
-): stylelint$api {
+): stylelint$internalApi {
   const stylelint: Object = { _options: options }
 
   stylelint._explorer = cosmiconfig("stylelint", {

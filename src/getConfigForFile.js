@@ -1,12 +1,12 @@
 /* @flow */
 import type {
-  stylelint$api,
   stylelint$configAugmented,
+  stylelint$internalApi,
 } from "./flow-declarations"
 import { configurationError } from "./utils"
 
 export default function (
-  stylelint: stylelint$api,
+  stylelint: stylelint$internalApi,
   searchPath?: string,
 ): Promise<{
   config: stylelint$configAugmented,

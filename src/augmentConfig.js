@@ -1,9 +1,9 @@
 /* @flow */
 import type {
-  stylelint$api,
   stylelint$config,
   stylelint$configAugmented,
   stylelint$configProcessors,
+  stylelint$internalApi,
 } from "./flow-declarations"
 import _ from "lodash"
 import { configurationError } from "./utils"
@@ -18,7 +18,7 @@ const DEFAULT_IGNORE_FILENAME = ".stylelintignore"
 const FILE_NOT_FOUND_ERROR_CODE = "ENOENT"
 
 export default function (
-  stylelint: stylelint$api,
+  stylelint: stylelint$internalApi,
   cosmiconfigResult: {
     config: stylelint$config,
     configDir: string,
@@ -81,7 +81,7 @@ function performBasicAugmentations(
 }
 
 function addIgnorePatterns(
-  stylelint: stylelint$api,
+  stylelint: stylelint$internalApi,
   config: stylelint$config,
 ): Promise<stylelint$config> {
   const ignoreFilePath = stylelint._options.ignorePath || DEFAULT_IGNORE_FILENAME
