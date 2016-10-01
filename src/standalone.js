@@ -108,6 +108,10 @@ function handleError(error) {
   }
 }
 
+// By converting syntax errors to stylelint results,
+// we can control their appearance in the formatted output
+// and other tools like editor plugins can decide how to
+// present them, as well
 function convertCssSyntaxErrorToResult(
   error: CssSyntaxError,
 ): stylelint$result {

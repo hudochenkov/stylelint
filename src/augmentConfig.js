@@ -17,6 +17,8 @@ import rules from "./rules"
 const DEFAULT_IGNORE_FILENAME = ".stylelintignore"
 const FILE_NOT_FOUND_ERROR_CODE = "ENOENT"
 
+// - Makes all paths absolute
+// - Merges extends
 function augmentConfigBasic(
   stylelint: Object,
   config: stylelint$config,
@@ -31,9 +33,12 @@ function augmentConfigBasic(
     })
 }
 
+// Extended configs need to be run through augmentConfigBasic
+// but do not need the full treatment. Things like pluginFunctions
+// will be resolved and added by the parent config.
 function augmentConfigExtended(
   stylelint: Object,
-  cosmiconfigResult: {
+  cosmiconfigResult: ?{
     config: stylelint$config,
     filepath: string,
   },
@@ -41,6 +46,8 @@ function augmentConfigExtended(
   config: stylelint$config,
   filepath: string,
 }> {
+  if (!cosmiconfigResult) return Promise.resolve(null)
+
   const configDir = path.dirname(cosmiconfigResult.filepath || "")
   const cleanedConfig = _.omit(cosmiconfigResult.config, "ignoreFiles")
   return augmentConfigBasic(stylelint, cleanedConfig, configDir).then((augmentedConfig) => {
@@ -95,6 +102,8 @@ function augmentConfigFull(
     })
 }
 
+// Load a file ignore ignore patterns, if there is one;
+// then add them to the config as an ignorePatterns property
 function addIgnorePatterns(
   stylelint: stylelint$internalApi,
   config: stylelint$config,
@@ -120,6 +129,11 @@ function addIgnorePatterns(
   })
 }
 
+// Make all paths in the config absolute:
+// - ignoreFiles
+// - plugins
+// - processors
+// (extends handled elsewhere)
 function absolutizePaths(
   config: stylelint$config,
   configDir: string,
@@ -144,6 +158,8 @@ function absolutizePaths(
   return config
 }
 
+// First try to resolve from the provided directory,
+// then try to resolve from process.cwd.
 function getModulePath(
   basedir: string,
   lookup: string,
@@ -160,6 +176,8 @@ function getModulePath(
   return path
 }
 
+// Processors are absolutized in their own way because
+// they can be and return a string or an array
 function absolutizeProcessors(
   processors: stylelint$configProcessors,
   configDir: string,
@@ -184,7 +202,6 @@ function extendConfig(
   if (!config.extends) return Promise.resolve(config)
 
   const originalWithoutExtends = _.omit(config, "extends")
-
   const loadExtends = [].concat(config.extends).reduce((resultPromise, extendLookup) => {
     return resultPromise.then((resultConfig) => {
       return loadExtendedConfig(stylelint, resultConfig, configDir, extendLookup).then((extendResult) => {
@@ -208,6 +225,12 @@ function loadExtendedConfig(
   return stylelint._extendExplorer.load(null, extendPath)
 }
 
+// When merging configs (via extends)
+// - plugin and processor arrays are joined
+// - rules are merged via Object.assign, so there is no attempt made to
+//   merge any given rule's settings. If b contains the same rule as a,
+//   b's rule settings will override a's rule settings entirely.
+// - Everything else is merged via Object.assign
 function mergeConfigs(
   a: stylelint$config,
   b: stylelint$config,
@@ -216,10 +239,17 @@ function mergeConfigs(
   if (a.plugins || b.plugins) {
     pluginMerger.plugins = _.union(a.plugins, b.plugins)
   }
+
+  const processorMerger = {}
+  if (a.processors || b.processors) {
+    processorMerger.processors = _.union(a.processors, b.processors)
+  }
+
   const rulesMerger = {}
   if (a.rules || b.rules) {
     rulesMerger.rules = Object.assign({}, a.rules, b.rules)
   }
+
   return Object.assign({}, b, a, pluginMerger, rulesMerger)
 }
 
@@ -277,8 +307,17 @@ function normalizeAllRuleSettings(
   return config
 }
 
+// Given an array of processors strings, we want to add two
+// properties to the augmented config:
+// - codeProcessors: functions that will run on code as it comes in
+// - resultProcessors: functions that will run on results as they go out
+//
+// To create these properties, we need to:
+// - Find the processor module
+// - Intialize the processor module by calling its functions with any
+//   provided options
+// - Push the processor's code and result processors to their respective arrays
 const processorCache = new Map()
-
 function addProcessorFunctions(
   config: stylelint$configAugmented
 ): stylelint$configAugmented {

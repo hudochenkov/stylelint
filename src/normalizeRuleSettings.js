@@ -5,17 +5,21 @@ import {
 } from "./flow-declarations"
 import _ from "lodash"
 
+// Rule settings can take a number of forms, e.g.
+// - "rule-name": null
+// - "rule-name": [null]
+// - "rule-name": primaryOption
+// - "rule-name": [primaryOption]
+// - "rule-name": [primaryOption, secondaryOption]
+// Where primaryOption can be anything: primitive, Object, or Array.
+//
+// This function normalizes all the possibilities into the
+// standard form: [primaryOption, secondaryOption]
 export default function (
   rawSettings: stylelint$configRuleSettings,
   ruleName: string,
   primaryOptionArray?: boolean,
 ): Array<stylelint$configRulePrimaryOption | [stylelint$configRulePrimaryOption, Object]> {
-  // Settings can be
-  // a. A solitary primitive value or object, in which case put it in an array
-  // b. An array with a primary option and a secondary options object, in which case use that array
-  // c. A solitary array ... in which case we have trouble and need to special-case it
-  //    ... hence the list above
-
   if (!Array.isArray(rawSettings)) { return [rawSettings] }
   // Everything below is an array ...
 

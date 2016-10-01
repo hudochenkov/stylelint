@@ -9,6 +9,8 @@ import assignDisabledRanges from "./assignDisabledRanges"
 import { configurationError } from "./utils"
 import ruleDefinitions from "./rules"
 
+// Run stylelint on a PostCSS Result, either one that is provided
+// or one that we create
 export default function (
   stylelint: stylelint$internalApi,
   options: {

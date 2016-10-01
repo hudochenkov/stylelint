@@ -15,6 +15,9 @@ import getPostcssResult from "./getPostcssResult"
 import isPathIgnored from "./isPathIgnored"
 import lintSource from "./lintSource"
 
+// The stylelint "internal API" is passed among functions
+// so that methods on a stylelint instance can invoke
+// each other while sharing options and caches
 export default function (
   options: stylelint$options = {},
 ): stylelint$internalApi {
